@@ -27,12 +27,23 @@ public class SessionManager {
         }
     }
 
-    // --- ECCO IL PEZZO CHE MANCAVA ---
+    // --- ORA IL METODO CHIEDE 4 DATI (INCLUSA L'EMAIL) ---
+    public boolean register(String username, String email, String password, String ruolo) {
+        // Controllo se l'utente esiste già
+        if (userDAO.findByUsername(username) != null) {
+            return false; // Utente già esistente
+        }
+        
+        // Crea e salva il nuovo utente passando tutti e 4 i parametri
+        User newUser = new User(username, email, password, ruolo);
+        userDAO.save(newUser);
+        return true;
+    }
+
     public void logout() {
         this.currentUser = null;
         System.out.println("Utente disconnesso.");
     }
-    // ---------------------------------
 
     public User getCurrentUser() {
         return currentUser;
