@@ -1,5 +1,0 @@
-package it.unipv.ingsfw.Uploop.dao;
-
-public class MySqlUserDAO {
-
-}

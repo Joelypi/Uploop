@@ -1,7 +1,0 @@
-package it.unipv.ingsfw.Uploop.exception;
-
-public class InvalidInputException extends Exception {
-    public InvalidInputException(String messaggio) {
-        super(messaggio);
-    }
-}
