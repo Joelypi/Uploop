@@ -1,5 +1,3 @@
--- Script di creazione del database Uploop
--- Esegui questo script in MySQL Workbench (o riga di comando) prima di avviare l'app.
 
 CREATE DATABASE IF NOT EXISTS uploop_db;
 USE uploop_db;
@@ -22,5 +20,5 @@ CREATE TABLE IF NOT EXISTS orders (
     FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
 );
 
--- (Facoltativo) un utente di prova per verificare subito il login
+-- un utente di prova per verificare subito il login
 -- INSERT INTO users (username, password) VALUES ('mario', 'password123');
