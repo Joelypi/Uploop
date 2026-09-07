@@ -1,0 +1,74 @@
+package it.unipv.ingsfw.Uploop.dao;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import it.unipv.ingsfw.Uploop.model.Order;
+import it.unipv.ingsfw.Uploop.exception.DatabaseException; // la nostra eccezione
+
+public class MySqlOrderDAO {
+	
+    private final String URL = DBConfig.getProperty("db.url");
+    private final String USER = DBConfig.getProperty("db.user");
+    private final String PASSWORD = DBConfig.getProperty("db.password");
+
+    // NOTA IL "throws DatabaseException" qui sotto: avvisa che potrebbe scattare l'allarme
+    public void salvaOrdine(String username, String formato, int quantita, String tipoCarta, boolean grafica, String note) throws DatabaseException {
+        String query = "INSERT INTO orders (username, formato, quantita, tipo_carta, grafica_vettoriale, note) VALUES (?, ?, ?, ?, ?, ?)";
+        
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            
+            stmt.setString(1, username);
+            stmt.setString(2, formato);
+            stmt.setInt(3, quantita);
+            stmt.setString(4, tipoCarta);
+            stmt.setBoolean(5, grafica);
+            stmt.setString(6, note);
+            
+            stmt.executeUpdate();
+            System.out.println("BINGO! Ordine salvato con successo!");
+            
+        } catch (SQLException e) {
+            // QUI LANCIA IL  L'ALLARME 
+            throw new DatabaseException("Impossibile salvare l'ordine. Il database è offline o irraggiungibile.");
+        }
+    }
+
+    public List<Order> getOrdiniUtente(String username) throws DatabaseException {
+        List<Order> listaOrdini = new ArrayList<>();
+        String query = "SELECT * FROM orders WHERE username = ?";
+        
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                String formato = rs.getString("formato");
+                int quantita = rs.getInt("quantita");
+                String carta = rs.getString("tipo_carta");
+                
+                double totale = quantita * 0.50;
+                if (rs.getBoolean("grafica_vettoriale")) {
+                    totale += 20.00;
+                }
+                
+                Order ordine = new Order(formato, quantita, carta, totale);
+                listaOrdini.add(ordine);
+            }
+            
+        } catch (SQLException e) {
+            // LANCIO ECCEZIONE PERSONALIZZATA
+            throw new DatabaseException("Impossibile recuperare gli ordini. Il database non risponde.");
+        }
+        
+        return listaOrdini;
+    }
+}

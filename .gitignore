@@ -1,0 +1,21 @@
+# --- File compilati Java ---
+bin/
+build/
+target/
+*.class
+
+# --- File di progetto IDE ---
+.settings/
+.classpath
+.project
+.idea/
+*.iml
+out/
+
+# --- Credenziali e configurazione locale (NON versionare mai) ---
+**/db.properties
+*.env
+
+# --- OS / varie ---
+.DS_Store
+Thumbs.db
