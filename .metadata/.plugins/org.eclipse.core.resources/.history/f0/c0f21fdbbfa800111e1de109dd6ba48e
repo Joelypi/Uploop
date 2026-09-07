@@ -1,0 +1,37 @@
+package it.unipv.ingsfw.Uploop.dao;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+public class MySqlOrderDAO {
+	
+    // ATTENZIONE: Usa la stessa identica password di MySqlUserDAO!
+	private final String URL = DBConfig.getProperty("db.url");
+    private final String USER = DBConfig.getProperty("db.user");
+    private final String PASSWORD = DBConfig.getProperty("db.password");
+
+    // Questo è il metodo magico che prende i dati e li spara nel database
+    public void salvaOrdine(String username, String formato, int quantita, String tipoCarta, boolean grafica, String note) {
+        String query = "INSERT INTO orders (username, formato, quantita, tipo_carta, grafica_vettoriale, note) VALUES (?, ?, ?, ?, ?, ?)";
+        
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            
+            stmt.setString(1, username);
+            stmt.setString(2, formato);
+            stmt.setInt(3, quantita);
+            stmt.setString(4, tipoCarta);
+            stmt.setBoolean(5, grafica);
+            stmt.setString(6, note);
+            
+            stmt.executeUpdate(); // Esegue l'inserimento!
+            System.out.println("BINGO! Ordine salvato con successo nel database!");
+            
+        } catch (SQLException e) {
+            System.out.println("Errore durante il salvataggio dell'ordine:");
+            e.printStackTrace();
+        }
+    }
+}

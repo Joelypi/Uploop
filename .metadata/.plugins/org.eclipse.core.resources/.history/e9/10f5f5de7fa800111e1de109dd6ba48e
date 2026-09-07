@@ -1,0 +1,61 @@
+package it.unipv.ingsfw.Uploop.controller;
+
+
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+
+public class OrderController {
+    
+    public void gestisciOrdine(String formato, String quantitaStr, String carta, boolean vettoriale, String note, JFrame finestraOrdine) {
+        try {
+            int quantita = Integer.parseInt(quantitaStr);
+            if (quantita <= 0) {
+                JOptionPane.showMessageDialog(finestraOrdine, "La quantità deve essere maggiore di zero!", "Errore", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            // Pattern Builder 
+            Locandina locandina = new Locandina.Builder(formato, quantita)
+                .setTipoCarta(carta)
+                .setGraficaVettoriale(vettoriale)
+                .setTesto(note)
+                .build();
+                
+            double prezzo = quantita * 0.50;
+            if (vettoriale) {
+                prezzo += 20.0;
+            }
+            
+            String[] opzioni = {"PayPal", "Carta di Credito"};
+            int scelta = JOptionPane.showOptionDialog(finestraOrdine,
+                "Riepilogo:\n" + locandina.toString() + "\n\nTotale Ordine: " + prezzo + "€.\nScegli metodo di pagamento:",
+                "Checkout",
+                0, JOptionPane.QUESTION_MESSAGE, null, opzioni, opzioni[0]);
+                
+            if (scelta == JOptionPane.CLOSED_OPTION) {
+                return;
+            }
+            
+            // Pattern Strategy
+            PaymentStrategy strategy;
+            if (scelta == 0) {
+                String identificativo = "utente";
+                if (SessionManager.getInstance().getCurrentUser() != null) {
+                    // CORREZIONE: Ora usa l'username al posto dell'email inesistente
+                    identificativo = SessionManager.getInstance().getCurrentUser().getUsername();
+                }
+                strategy = new PayPalPayment(identificativo);
+            } else {
+                strategy = new CreditCardPayment("1234-5678-9012");
+            }
+            
+            strategy.paga(prezzo);
+            
+            JOptionPane.showMessageDialog(finestraOrdine, "Pagamento Riuscito! Ordine inviato.");
+            finestraOrdine.dispose();
+            
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(finestraOrdine, "Inserisci una quantità numerica valida!", "Errore", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+}

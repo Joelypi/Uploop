@@ -1,0 +1,48 @@
+package it.unipv.ingsfw.Uploop.model;
+
+import it.unipv.ingsfw.Uploop.dao.MySqlUserDAO;
+import it.unipv.ingsfw.Uploop.dao.UserDAO;
+
+public class SessionManager {
+    private static SessionManager instance;
+    private User currentUser;
+    
+    // ECCO LA MODIFICA: Ora usiamo il VERO database MySQL!
+    private UserDAO userDAO = new MySqlUserDAO(); 
+
+    private SessionManager() {
+    }
+
+    public static SessionManager getInstance() {
+        if (instance == null) {
+            instance = new SessionManager();
+        }
+        return instance;
+    }
+
+    // Metodo per il Login
+    public boolean login(String username, String password) {
+        User user = userDAO.findByUsername(username);
+        
+        if (user != null && user.getPassword().equals(password)) {
+            currentUser = user;
+            return true;
+        }
+        return false;
+    }
+
+    // Metodo per il Logout
+    public void logout() {
+        currentUser = null;
+    }
+
+    // Metodo per sapere chi è loggato
+    public User getCurrentUser() {
+        return currentUser;
+    }
+    
+    // Metodo per registrare un nuovo utente
+    public void registerUser(User newUser) {
+        userDAO.save(newUser);
+    }
+}

@@ -1,0 +1,30 @@
+package it.unipv.ingsfw.Uploop.model;
+
+// Questa classe usa il pattern BUILDER
+public class Locandina {
+    // Parametri della locandina (tutti privati)
+    private String formato;    // es. A4, A3
+    private String tipoCarta;  // es. Lucida, Opaca
+    private String testo;      // Il contenuto
+    private boolean graficaVettoriale;
+    private int quantita;
+
+    // Costruttore PRIVATO: si può usare solo tramite il Builder
+ // Questo deve sostituire il vecchio costruttore!
+    public Locandina(String formato, String tipoCarta, String testo, boolean graficaVettoriale, int quantita) {
+        this.formato = formato;
+        this.tipoCarta = tipoCarta;
+        this.testo = testo;
+        this.graficaVettoriale = graficaVettoriale;
+        this.quantita = quantita;
+    }
+    }
+
+    // Metodo per stampare i dettagli (utile per la console)
+    @Override
+    public String toString() {
+        return "Locandina [Formato=" + formato + ", Carta=" + tipoCarta + 
+               ", Quantità=" + quantita + ", Vettoriale=" + graficaVettoriale + "]";
+    }
+
+}

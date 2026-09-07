@@ -1,0 +1,143 @@
+package it.unipv.ingsfw.Uploop.frame;
+
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.util.List;
+
+import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.border.EmptyBorder;
+
+import it.unipv.ingsfw.Uploop.model.Order;
+import it.unipv.ingsfw.Uploop.model.User;
+import it.unipv.ingsfw.Uploop.service.SessionManager;
+
+public class OrderStatusFrame extends JFrame {
+
+    private Color themeBlue = new Color(20, 0, 180);
+
+    public OrderStatusFrame() {
+        setTitle("Uploop - I Miei Ordini");
+        setSize(700, 750);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); 
+        setLocationRelativeTo(null);
+
+        // --- CONTROLLO SICUREZZA ---
+        User utenteCorrente = SessionManager.getInstance().getCurrentUser();
+        if (utenteCorrente == null) {
+            JOptionPane.showMessageDialog(this, "Devi effettuare l'accesso per vedere i tuoi ordini.", "Errore", JOptionPane.ERROR_MESSAGE);
+            dispose();
+            return;
+        }
+
+        // --- CARICAMENTO LOGO ---
+        BufferedImage logoImage = null;
+        try {
+        	java.net.URL logoUrl = getClass().getResource("/it/unipv/ingsfw/Uploop/view/PHOTO-2026-02-14-14-19-50 2.jpg");
+        	if(logoUrl != null) logoImage = ImageIO.read(logoUrl);
+        } catch(Exception e) {
+            System.out.println("Immagine logo non trovata.");
+        }
+
+        // --- SFONDO BIANCO ---
+        JPanel mainPanel = new JPanel();
+        mainPanel.setBackground(Color.WHITE);
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+
+        // -- LOGO IN CIMA --
+        JLabel lblLogo = new JLabel();
+        if (logoImage != null) {
+            Image scaledLogo = logoImage.getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+            lblLogo.setIcon(new ImageIcon(scaledLogo));
+        } else {
+            lblLogo.setText("UPLOOP");
+            lblLogo.setFont(new Font("Segoe UI", Font.BOLD, 30));
+            lblLogo.setForeground(themeBlue);
+        }
+        lblLogo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        mainPanel.add(lblLogo);
+        mainPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+
+        // -- TITOLO --
+        JLabel lblTitle = new JLabel("I TUOI ORDINI, " + utenteCorrente.getUsername().toUpperCase());
+        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        lblTitle.setForeground(Color.BLACK);
+        lblTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
+        mainPanel.add(lblTitle);
+        mainPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+
+        // --- LISTA DEGLI ORDINI ---
+        JPanel ordersContainer = new JPanel();
+        ordersContainer.setLayout(new BoxLayout(ordersContainer, BoxLayout.Y_AXIS));
+        ordersContainer.setBackground(Color.WHITE);
+
+        // --- MODIFICA DATABASE QUI ---
+        it.unipv.ingsfw.Uploop.dao.MySqlOrderDAO orderDAO = new it.unipv.ingsfw.Uploop.dao.MySqlOrderDAO();
+        List<Order> mieiOrdini = orderDAO.getOrdiniUtente(utenteCorrente.getUsername());
+        // ------------------------------
+
+        if (mieiOrdini.isEmpty()) {
+            JLabel emptyLabel = new JLabel("Non hai ancora effettuato nessun ordine.");
+            emptyLabel.setFont(new Font("Segoe UI", Font.ITALIC, 16));
+            emptyLabel.setForeground(Color.GRAY);
+            emptyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            ordersContainer.add(emptyLabel);
+        } else {
+            for (int i = 0; i < mieiOrdini.size(); i++) {
+                Order ord = mieiOrdini.get(i);
+                ordersContainer.add(creaTesseraOrdine(ord, i + 1));
+                ordersContainer.add(Box.createRigidArea(new Dimension(0, 15))); 
+            }
+        }
+
+        JScrollPane scrollPane = new JScrollPane(ordersContainer);
+        scrollPane.setBorder(null); 
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.setBackground(Color.WHITE);
+        mainPanel.add(scrollPane);
+
+        setContentPane(mainPanel);
+        setVisible(true);
+    }
+
+    private JPanel creaTesseraOrdine(Order ordine, int numeroOrdine) {
+        JPanel card = new JPanel(new GridLayout(3, 1));
+        card.setBackground(Color.WHITE);
+        card.setMaximumSize(new Dimension(600, 120));
+        card.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(themeBlue, 2), 
+            BorderFactory.createEmptyBorder(10, 15, 10, 15)
+        ));
+
+        JLabel lblHeader = new JLabel("Ordine #" + numeroOrdine);
+        lblHeader.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        lblHeader.setForeground(themeBlue);
+        card.add(lblHeader);
+
+        JLabel lblDettagli = new JLabel("Formato: " + ordine.getFormato() + " | Quantità: " + ordine.getQuantita() + " | Carta: " + ordine.getCarta());
+        lblDettagli.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lblDettagli.setForeground(Color.DARK_GRAY);
+        card.add(lblDettagli);
+
+        JLabel lblPrezzo = new JLabel("Totale Pagato: €" + String.format("%.2f", ordine.getPrezzoTotale()));
+        lblPrezzo.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        lblPrezzo.setForeground(Color.BLACK);
+        card.add(lblPrezzo);
+
+        return card;
+    }
+}

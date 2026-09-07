@@ -1,0 +1,9 @@
+package it.unipv.ingsfw.Uploop.exception;
+
+// Estendiamo Exception per dire a Java che questa classe è un "Allarme"
+public class DatabaseException extends Exception {
+    
+    public DatabaseException(String messaggio) {
+        super(messaggio); // Passiamo il messaggio d'errore a Java
+    }
+}

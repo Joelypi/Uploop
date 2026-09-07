@@ -1,0 +1,346 @@
+package it.unipv.ingsfw.Uploop.frame;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.RenderingHints;
+import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
+
+import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+
+import it.unipv.ingsfw.Uploop.model.User;
+import it.unipv.ingsfw.Uploop.test.SessionManager;
+
+public class DashboardFrame extends JFrame {
+
+    public DashboardFrame() {
+        setTitle("Uploop - Dashboard");
+        setSize(1050, 650); 
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        
+        // --- SFONDO A TUTTO SCHERMO ---
+        JPanel backgroundPanel = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                
+                try {
+                    // Lettura immagine con ClassLoader
+                    java.net.URL imgURL = getClass().getResource("/it/unipv/ingsfw/Uploop/view/UPLOOP.presentazione (1).jpg"); 
+                    if(imgURL != null) {
+                        Image bgImage = ImageIO.read(imgURL);  
+                        g.drawImage(bgImage, 0, 0, getWidth(), getHeight(), this);
+                    } else {
+                        System.out.println("ERRORE SFONDO: Sfondo non trovato nel pacchetto view");
+                        g.setColor(new Color(0, 51, 153));
+                        g.fillRect(0, 0, getWidth(), getHeight());
+                    }
+                } catch (Exception ex) {
+                    g.setColor(new Color(0, 51, 153));
+                    g.fillRect(0, 0, getWidth(), getHeight());
+                }
+               
+            }
+        };
+        setContentPane(backgroundPanel);
+
+        // --- PANNELLO LATERALE DESTRO (Trasparente) ---
+        JPanel rightPanel = new JPanel();
+        rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
+        rightPanel.setOpaque(false); 
+        rightPanel.setBorder(new EmptyBorder(0, 0, 0, 60)); 
+        
+        rightPanel.add(Box.createVerticalGlue()); 
+
+        // 1. BLU SCURO: Bottone Ordine
+        ModernButton btnOrdina = new ModernButton("CONFIGURA ORDINE", new Color(0, 40, 120), new Color(0, 60, 160), Color.WHITE);
+        btnOrdina.addActionListener(e -> {
+            new OrderFrame(); 
+        });
+        rightPanel.add(btnOrdina);
+        rightPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+
+        // 2. BLU CLASSICO: Bottone Informazioni (PORTFOLIO)
+        ModernButton btnInfo = new ModernButton("SCOPRI I SERVIZI", new Color(0, 90, 200), new Color(30, 120, 230), Color.WHITE);
+        btnInfo.addActionListener(e -> {
+            
+            JDialog infoDialog = new JDialog(this, "Portfolio UPLOOP", true);
+            infoDialog.setSize(750, 650);
+            infoDialog.setLocationRelativeTo(this); 
+            infoDialog.setLayout(new BorderLayout());
+
+            // -- INTESTAZIONE --
+            JPanel headerPanel = new JPanel();
+            headerPanel.setBackground(new Color(0, 51, 153));
+            headerPanel.setBorder(new EmptyBorder(20, 10, 20, 10));
+            JLabel lblHeader = new JLabel("UPLOOP - LEVEL UP YOUR MARKETING");
+            lblHeader.setFont(new Font("Segoe UI", Font.BOLD, 22));
+            lblHeader.setForeground(Color.WHITE);
+            headerPanel.add(lblHeader);
+            infoDialog.add(headerPanel, BorderLayout.NORTH);
+            
+            // -- CORPO CENTRALE --
+            JPanel bodyPanel = new JPanel();
+            bodyPanel.setLayout(new BoxLayout(bodyPanel, BoxLayout.Y_AXIS));
+            bodyPanel.setBackground(Color.WHITE);
+            bodyPanel.setBorder(new EmptyBorder(25, 20, 20, 20)); 
+            
+            JLabel lblTesto1 = new JLabel("Siamo un'agenzia creativa orgogliosamente basata a Voghera.");
+            lblTesto1.setFont(new Font("Segoe UI", Font.BOLD, 15));
+            lblTesto1.setAlignmentX(Component.CENTER_ALIGNMENT);
+            
+            JLabel lblTesto2 = new JLabel("Non stampiamo solo carta, diamo vita alla tua identità visiva");
+            lblTesto2.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+            lblTesto2.setAlignmentX(Component.CENTER_ALIGNMENT);
+            
+            JLabel lblTesto3 = new JLabel("trasformando le idee in grafiche d'impatto.");
+            lblTesto3.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+            lblTesto3.setAlignmentX(Component.CENTER_ALIGNMENT);
+            
+            JLabel lblTesto4 = new JLabel("Esplora il nostro portfolio (Clicca sulle immagini per ingrandirle):");
+            lblTesto4.setFont(new Font("Segoe UI", Font.ITALIC, 16));
+            lblTesto4.setForeground(Color.GRAY);
+            lblTesto4.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            bodyPanel.add(lblTesto1);
+            bodyPanel.add(lblTesto2);
+            bodyPanel.add(lblTesto3);
+            bodyPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+            bodyPanel.add(lblTesto4);
+            bodyPanel.add(Box.createRigidArea(new Dimension(0, 25)));
+            
+            // -- GALLERIA IMMAGINI --
+            JPanel galleryPanel = new JPanel(new GridLayout(0, 2, 20, 20));
+            galleryPanel.setBackground(Color.WHITE);
+            
+            // Percorsi per il ClassLoader
+            String[] portfolioImages = {
+                "/it/unipv/ingsfw/Uploop/view/PHOTO-2026-01-08-00-53-33.jpg",
+                "/it/unipv/ingsfw/Uploop/view/PHOTO-2026-01-08-00-53-33 2.jpg",
+                "/it/unipv/ingsfw/Uploop/view/PHOTO-2026-01-08-00-53-33 3.jpg",
+                "/it/unipv/ingsfw/Uploop/view/PHOTO-2026-01-08-00-53-33 4.jpg",
+                "/it/unipv/ingsfw/Uploop/view/PHOTO-2026-01-08-00-53-33 5.jpg"
+            };
+
+            for (int i = 0; i < portfolioImages.length; i++) {
+                String imgPath = portfolioImages[i];
+                try {
+                    java.net.URL imgURL = getClass().getResource(imgPath);
+                    if(imgURL != null) {
+                        BufferedImage originalImg = ImageIO.read(imgURL);
+                        if (originalImg != null) {
+                            
+                            BufferedImage displayImg = originalImg;
+                            
+                            if (i == 0 || i == 1) {
+                                int widthWithoutPalette = (int)(originalImg.getWidth() * 0.85); 
+                                displayImg = originalImg.getSubimage(0, 0, widthWithoutPalette, originalImg.getHeight());
+                            }
+                            
+                            int targetWidth = 280; 
+                            int targetHeight = (displayImg.getHeight() * targetWidth) / displayImg.getWidth();
+                            
+                            Image imgScalata = displayImg.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH);
+                            JLabel lblImmagine = new JLabel(new ImageIcon(imgScalata));
+                            lblImmagine.setBorder(BorderFactory.createLineBorder(new Color(230, 230, 230), 1));
+                            lblImmagine.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                            lblImmagine.setToolTipText("Clicca per ingrandire");
+                            
+                            final BufferedImage finalImgForZoom = displayImg; 
+                            lblImmagine.addMouseListener(new java.awt.event.MouseAdapter() {
+                                public void mouseClicked(java.awt.event.MouseEvent evt) {
+                                    mostraImmagineIngrandita(finalImgForZoom); 
+                                }
+                            });
+                            
+                            galleryPanel.add(lblImmagine);
+                        } 
+                    } else {
+                        System.out.println("ERRORE: File immagine non trovato in -> " + imgPath);
+                    }
+                } catch (Exception ex) {
+                    System.out.println("Errore nel caricamento dell'immagine: " + imgPath);
+                    ex.printStackTrace();
+                }
+            }
+            
+            JScrollPane scrollPane = new JScrollPane(galleryPanel);
+            scrollPane.setBorder(BorderFactory.createEmptyBorder()); 
+            scrollPane.getVerticalScrollBar().setUnitIncrement(16); 
+            bodyPanel.add(scrollPane);
+            
+            infoDialog.add(bodyPanel, BorderLayout.CENTER);
+
+            // -- FOOTER --
+            JPanel footerPanel = new JPanel();
+            footerPanel.setBackground(Color.WHITE);
+            footerPanel.setBorder(new EmptyBorder(10, 10, 20, 10));
+            
+            JButton btnChiudi = new JButton("CHIUDI");
+            btnChiudi.setFont(new Font("Segoe UI", Font.BOLD, 14));
+            btnChiudi.setBackground(new Color(240, 240, 240));
+            btnChiudi.setForeground(Color.DARK_GRAY);
+            btnChiudi.setFocusPainted(false);
+            btnChiudi.setBorderPainted(false);
+            btnChiudi.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            btnChiudi.setPreferredSize(new Dimension(150, 40));
+            btnChiudi.addActionListener(ev -> infoDialog.dispose());
+            footerPanel.add(btnChiudi);
+            
+            infoDialog.add(footerPanel, BorderLayout.SOUTH);
+
+            infoDialog.setVisible(true);
+        });
+        
+        rightPanel.add(btnInfo);
+        rightPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+
+        // --- CONTROLLO UTENTE ---
+        User utenteAttuale = SessionManager.getInstance().getCurrentUser();
+
+        // 3. BLU MEDIO: Bottone I MIEI ORDINI 
+        if (utenteAttuale != null) {
+            ModernButton btnMieiOrdini = new ModernButton("I MIEI ORDINI", new Color(0, 120, 220), new Color(40, 140, 240), Color.WHITE);
+            btnMieiOrdini.addActionListener(e -> {
+                new OrderStatusFrame(); 
+            });
+            rightPanel.add(btnMieiOrdini);
+            rightPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        }
+
+        // 4. BLU CHIARO: Bottone Login / Logout
+        if (utenteAttuale == null) {
+            ModernButton btnVaiLogin = new ModernButton("ACCEDI / REGISTRATI", new Color(70, 150, 250), new Color(100, 170, 255), Color.WHITE);
+            btnVaiLogin.addActionListener(e -> {
+                new LoginFrame();
+                dispose();
+            });
+            rightPanel.add(btnVaiLogin);
+        } else {
+            ModernButton btnLogout = new ModernButton("ESCI (LOGOUT)", new Color(70, 150, 250), new Color(100, 170, 255), Color.WHITE);
+            btnLogout.addActionListener(e -> {
+                SessionManager.getInstance().logout();
+                new DashboardFrame(); 
+                dispose();
+            });
+            rightPanel.add(btnLogout);
+        }
+
+        rightPanel.add(Box.createVerticalGlue()); 
+        backgroundPanel.add(rightPanel, BorderLayout.EAST);
+
+        setVisible(true) ; 
+    }
+
+    // --- FINESTRA IMMAGINE SCHERMO INTERO ---
+    private void mostraImmagineIngrandita(BufferedImage img) {
+        JDialog zoomDialog = new JDialog(this, "Zoom Locandina", true);
+        zoomDialog.setLayout(new BorderLayout());
+        zoomDialog.getContentPane().setBackground(new Color(30, 30, 30)); 
+
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int maxWidth = (int) (screenSize.width * 0.85); 
+        int maxHeight = (int) (screenSize.height * 0.85);
+
+        int imgW = img.getWidth();
+        int imgH = img.getHeight();
+
+        if (imgW > maxWidth || imgH > maxHeight) {
+            double scale = Math.min((double) maxWidth / imgW, (double) maxHeight / imgH);
+            imgW = (int) (imgW * scale);
+            imgH = (int) (imgH * scale);
+        }
+
+        Image imgIngrandita = img.getScaledInstance(imgW, imgH, Image.SCALE_SMOOTH);
+        JLabel lblZoom = new JLabel(new ImageIcon(imgIngrandita));
+        lblZoom.setHorizontalAlignment(SwingConstants.CENTER);
+        
+        lblZoom.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        lblZoom.setToolTipText("Clicca per chiudere");
+        lblZoom.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                zoomDialog.dispose();
+            }
+        });
+
+        zoomDialog.add(lblZoom, BorderLayout.CENTER);
+        
+        JLabel lblIstruzione = new JLabel("Clicca sull'immagine per chiudere");
+        lblIstruzione.setForeground(Color.LIGHT_GRAY);
+        lblIstruzione.setHorizontalAlignment(SwingConstants.CENTER);
+        lblIstruzione.setBorder(new EmptyBorder(10, 0, 10, 0));
+        zoomDialog.add(lblIstruzione, BorderLayout.SOUTH);
+
+        zoomDialog.setSize(imgW + 50, imgH + 80); 
+        zoomDialog.setLocationRelativeTo(null); 
+        zoomDialog.setVisible(true);
+    }
+
+    // --- CLASSE INTERNA PER I BOTTONI PARTICOLARI ---
+    private class ModernButton extends JButton {
+        private Color normalColor;
+        private Color hoverColor;
+
+        public ModernButton(String text, Color normalColor, Color hoverColor, Color textColor) {
+            super(text);
+            this.normalColor = normalColor;
+            this.hoverColor = hoverColor;
+            setForeground(textColor);
+            setFont(new Font("Segoe UI", Font.BOLD, 14));
+            setContentAreaFilled(false); 
+            setFocusPainted(false);
+            setBorderPainted(false);
+            setCursor(new Cursor(Cursor.HAND_CURSOR));
+            setAlignmentX(Component.RIGHT_ALIGNMENT); 
+            setPreferredSize(new Dimension(250, 50));
+            setMaximumSize(new Dimension(250, 50));
+
+            addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseEntered(java.awt.event.MouseEvent evt) {
+                    setBackground(hoverColor);
+                }
+                public void mouseExited(java.awt.event.MouseEvent evt) {
+                    setBackground(normalColor);
+                }
+            });
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            
+            if (getModel().isRollover()) {
+                g2.setColor(hoverColor);
+            } else {
+                g2.setColor(normalColor);
+            }
+            
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
+            
+            super.paintComponent(g);
+            g2.dispose();
+        }
+    }
+}

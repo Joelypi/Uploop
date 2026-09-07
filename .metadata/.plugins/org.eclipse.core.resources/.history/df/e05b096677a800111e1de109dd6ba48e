@@ -1,0 +1,16 @@
+package it.unipv.ingsfw.Uploop.model;
+
+import javax.swing.UIManager;
+
+public class Main {
+    public static void main(String[] args) {
+        // Questa magia attiva il tema grafico moderno del tuo computer!
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            System.out.println("Impossibile caricare il tema di sistema.");
+        }
+        
+        new DashboardFrame();
+    }
+}

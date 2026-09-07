@@ -1,0 +1,20 @@
+package it.unipv.ingsfw.Uploop.factory;
+
+import it.unipv.ingsfw.Uploop.model.Locandina;
+
+public class LocandinaFactory {
+    
+    // Metodo statico che fa da "Fabbrica"
+    public static Locandina creaLocandina(String formato, int quantita, String tipoCarta, String testo, boolean graficaVettoriale) {
+        
+        // La Factory può gestire i valori di default prima di creare l'oggetto
+        if (tipoCarta == null || tipoCarta.isEmpty()) {
+            tipoCarta = "Standard";
+        }
+        if (testo == null) {
+            testo = "";
+        }
+        
+        return new Locandina(formato, tipoCarta, testo, graficaVettoriale, quantita);
+    }
+}

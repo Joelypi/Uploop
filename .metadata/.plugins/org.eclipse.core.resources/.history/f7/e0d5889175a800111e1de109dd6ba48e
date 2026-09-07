@@ -1,0 +1,25 @@
+package it.unipv.ingsfw.Uploop.model;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class InMemoryUserDAO implements UserDAO {
+    private Map<String, User> database = new HashMap<>();
+
+    public InMemoryUserDAO() {
+        // CORREZIONE: Mario e Luigi ora hanno solo 2 parametri
+        database.put("mario", new User("mario", "password123"));
+        database.put("luigi", new User("luigi", "design2024"));
+    }
+
+    @Override
+    public User findByUsername(String username) {
+        return database.get(username);
+    }
+
+    @Override
+    public void save(User user) {
+        database.put(user.getUsername(), user);
+        System.out.println("Utente salvato nel DB: " + user.getUsername());
+    }
+}

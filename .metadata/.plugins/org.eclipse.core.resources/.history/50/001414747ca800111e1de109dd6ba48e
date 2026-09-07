@@ -1,0 +1,5 @@
+package it.unipv.ingsfw.Uploop.model;
+
+public interface PaymentStrategy {
+    void paga(double importo);
+}
